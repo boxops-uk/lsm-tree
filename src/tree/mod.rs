@@ -269,7 +269,10 @@ impl AbstractTree for Tree {
             &config.path,
             |v| {
                 let mut copy = v.clone();
-                copy.active_memtable = Arc::new(Memtable::new(self.memtable_id_counter.next()));
+                copy.active_memtable = Arc::new(Memtable::new(
+                    self.memtable_id_counter.next(),
+                    self.config.memtable_filter,
+                ));
                 copy.sealed_memtables = Arc::default();
                 copy.version = Version::new(v.version.id() + 1, self.tree_type());
                 Ok(copy)
@@ -501,7 +504,10 @@ impl AbstractTree for Tree {
         }
 
         let mut copy = version_history_lock.latest_version();
-        copy.active_memtable = Arc::new(Memtable::new(self.memtable_id_counter.next()));
+        copy.active_memtable = Arc::new(Memtable::new(
+                    self.memtable_id_counter.next(),
+                    self.config.memtable_filter,
+                ));
         copy.sealed_memtables = Arc::new(SealedMemtables::default());
 
         // Clear active is only used for recovery where snapshots do not exist yet
@@ -560,7 +566,10 @@ impl AbstractTree for Tree {
         let yanked_memtable = super_version.active_memtable;
 
         let mut copy = version_history_lock.latest_version();
-        copy.active_memtable = Arc::new(Memtable::new(self.memtable_id_counter.next()));
+        copy.active_memtable = Arc::new(Memtable::new(
+                    self.memtable_id_counter.next(),
+                    self.config.memtable_filter,
+                ));
         copy.sealed_memtables =
             Arc::new(super_version.sealed_memtables.add(yanked_memtable.clone()));
 
@@ -983,7 +992,7 @@ impl Tree {
             memtable_id_counter: SequenceNumberCounter::new(1),
             table_id_counter: SequenceNumberCounter::new(highest_table_id + 1),
             blob_file_id_counter: SequenceNumberCounter::default(),
-            version_history: Arc::new(RwLock::new(SuperVersions::new(version))),
+            version_history: Arc::new(RwLock::new(SuperVersions::new(version, config.memtable_filter))),
             stop_signal: StopSignal::default(),
             config: Arc::new(config),
             major_compaction_lock: RwLock::default(),

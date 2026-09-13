@@ -9,7 +9,96 @@ use crate::{
 };
 use crossbeam_skiplist::SkipMap;
 use std::ops::RangeBounds;
-use std::sync::atomic::{AtomicBool, AtomicU64};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering::Relaxed};
+
+/// A memtable's key filter, in 64-byte blocks — 1 MiB, about eight bits a key for a
+/// default 64 MiB memtable of small rows.
+///
+/// A guess, and the thing to fix before this is proposed anywhere: the memtable is
+/// bounded in *bytes* and a filter wants a count, so the honest version derives this
+/// from `max_memtable_size` rather than assuming a row size.
+const FILTER_BLOCKS: usize = 16 * 1_024;
+/// One cache line, as [`u64`]s.
+const BLOCK_WORDS: usize = 8;
+const FILTER_PROBES: u32 = 4;
+
+/// **A blocked Bloom filter over the user keys a memtable holds.**
+///
+/// Every sealed table already has a filter, and the memtable — the one part of the tree
+/// searched on *every* point read — does not. A read that misses therefore pays a full
+/// skiplist descent, comparing a key at each level, before it can conclude the key is
+/// not there. For a write path that interns, that is the common case by a long way:
+/// `resolve_or_create` asks "is this key present?" once per fact, and during a bulk
+/// load the answer is always no.
+///
+/// **Blocked, and that is not an optimisation detail.** A classic Bloom filter puts its
+/// `k` bits anywhere in the array, so each probe is its own cache miss and the write
+/// path touches four lines per row. Measured that way the reads got cheaper and the
+/// *writes* got dearer by more — 1 MiB of scattered `fetch_or` evicts the skiplist's
+/// own working set. Confining a key's bits to one 64-byte block costs a little accuracy
+/// and touches one line.
+///
+/// Lock-free, because the skiplist it guards is.
+///
+/// **Why relaxed is enough.** A false positive costs a skiplist descent and nothing
+/// else. A false *negative* would be a lost read, and cannot happen for any write the
+/// reader is entitled to see: the filter is set before the skiplist insert in program
+/// order, and a reader only knows to look for a write once it has synchronised with the
+/// sequence number that published it — which orders it after both. A reader racing an
+/// unpublished write may see either answer, which is what racing means.
+pub struct KeyFilter {
+    /// `FILTER_BLOCKS` blocks of `BLOCK_WORDS` words, laid out flat.
+    bits: Box<[AtomicU64]>,
+}
+
+impl KeyFilter {
+    fn new() -> Self {
+        Self {
+            bits: (0..FILTER_BLOCKS * BLOCK_WORDS)
+                .map(|_| AtomicU64::new(0))
+                .collect(),
+        }
+    }
+
+    /// The block a key lives in, and the `BLOCK_WORDS` masks its probes set there.
+    ///
+    /// One hash for everything: the high bits choose the block, the low bits walk the
+    /// probes within it (Kirsch-Mitzenmacher), so `k` probes cost one hash of the key.
+    fn probes(key: &[u8]) -> (usize, [u64; BLOCK_WORDS]) {
+        let hash = crate::hash::hash64(key);
+        let block = ((hash >> 32) as usize) % FILTER_BLOCKS;
+
+        let (h1, h2) = (hash as u32 as u64, ((hash >> 16) as u32 as u64) | 1);
+        let mut masks = [0u64; BLOCK_WORDS];
+
+        for i in 0..u64::from(FILTER_PROBES) {
+            // 512 bits to a block.
+            let bit = (h1.wrapping_add(i.wrapping_mul(h2)) % 512) as usize;
+            masks[bit / 64] |= 1 << (bit % 64);
+        }
+
+        (block * BLOCK_WORDS, masks)
+    }
+
+    fn set(&self, key: &[u8]) {
+        let (at, masks) = Self::probes(key);
+
+        for (word, mask) in masks.iter().enumerate() {
+            if *mask != 0 {
+                self.bits[at + word].fetch_or(*mask, Relaxed);
+            }
+        }
+    }
+
+    /// `false` is authoritative: the key was never inserted.
+    fn might_hold(&self, key: &[u8]) -> bool {
+        let (at, masks) = Self::probes(key);
+
+        masks.iter().enumerate().all(|(word, mask)| {
+            *mask == 0 || self.bits[at + word].load(Relaxed) & *mask == *mask
+        })
+    }
+}
 
 pub use crate::tree::inner::MemtableId;
 
@@ -35,6 +124,14 @@ pub struct Memtable {
     pub(crate) highest_seqno: AtomicU64,
 
     pub(crate) requested_rotation: AtomicBool,
+
+    /// See [`KeyFilter`], and `Config::memtable_filter` for why it is a choice.
+    ///
+    /// `None` unless the tree asked for it: **a filter is only worth its write cost to
+    /// a tree whose point reads miss.** One read by a key that is usually present pays
+    /// the set on every insert and collects nothing, because a hit has to do the
+    /// skiplist descent regardless.
+    filter: Option<KeyFilter>,
 }
 
 impl Memtable {
@@ -57,13 +154,14 @@ impl Memtable {
 
     #[doc(hidden)]
     #[must_use]
-    pub fn new(id: MemtableId) -> Self {
+    pub fn new(id: MemtableId, filtered: bool) -> Self {
         Self {
             id,
             items: SkipMap::default(),
             approximate_size: AtomicU64::default(),
             highest_seqno: AtomicU64::default(),
             requested_rotation: AtomicBool::default(),
+            filter: filtered.then(KeyFilter::new),
         }
     }
 
@@ -111,6 +209,14 @@ impl Memtable {
         // abcdef -> 6
         // abcdef -> 5
         //
+        // **The cheap no.** Every sealed table gets to answer this from a filter; the
+        // memtable had to descend a skiplist to say the same thing.
+        if let Some(filter) = &self.filter {
+            if !filter.might_hold(key) {
+                return None;
+            }
+        }
+
         let lower_bound = InternalKey::new(key, seqno - 1, ValueType::Value);
 
         let mut iter = self
@@ -158,6 +264,15 @@ impl Memtable {
             .fetch_add(item_size, std::sync::atomic::Ordering::AcqRel);
 
         let key = InternalKey::new(item.key.user_key, item.key.seqno, item.key.value_type);
+
+        // **Before the insert, not after.** A reader that finds the key in the skiplist
+        // must never have been told the filter does not hold it. A tombstone is an
+        // insert like any other, so removal needs nothing here — the filter answers
+        // "this memtable has an entry for this key", not "this key exists".
+        if let Some(filter) = &self.filter {
+            filter.set(&key.user_key);
+        }
+
         self.items.insert(key, item.value);
 
         self.highest_seqno
@@ -188,7 +303,7 @@ mod tests {
     #[test]
     #[expect(clippy::unwrap_used)]
     fn memtable_mvcc_point_read() {
-        let memtable = Memtable::new(0);
+        let memtable = Memtable::new(0, true);
 
         memtable.insert(InternalValue::from_components(
             *b"hello-key-999991",
@@ -231,7 +346,7 @@ mod tests {
 
     #[test]
     fn memtable_get() {
-        let memtable = Memtable::new(0);
+        let memtable = Memtable::new(0, true);
 
         let value =
             InternalValue::from_components(b"abc".to_vec(), b"abc".to_vec(), 0, ValueType::Value);
@@ -243,7 +358,7 @@ mod tests {
 
     #[test]
     fn memtable_get_highest_seqno() {
-        let memtable = Memtable::new(0);
+        let memtable = Memtable::new(0, true);
 
         memtable.insert(InternalValue::from_components(
             b"abc".to_vec(),
@@ -289,7 +404,7 @@ mod tests {
 
     #[test]
     fn memtable_get_prefix() {
-        let memtable = Memtable::new(0);
+        let memtable = Memtable::new(0, true);
 
         memtable.insert(InternalValue::from_components(
             b"abc0".to_vec(),
@@ -327,7 +442,7 @@ mod tests {
 
     #[test]
     fn memtable_get_old_version() {
-        let memtable = Memtable::new(0);
+        let memtable = Memtable::new(0, true);
 
         memtable.insert(InternalValue::from_components(
             b"abc".to_vec(),

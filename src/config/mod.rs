@@ -223,6 +223,9 @@ pub struct Config {
     /// by ~90% typically
     pub(crate) expect_point_read_hits: bool,
 
+    /// Build a Bloom filter over the **active memtable**, not only over sealed tables.
+    pub(crate) memtable_filter: bool,
+
     /// Filter construction policy
     pub filter_policy: FilterPolicy,
 
@@ -292,6 +295,7 @@ impl Default for Config {
             compaction_filter_factory: None,
 
             expect_point_read_hits: false,
+            memtable_filter: false,
 
             kv_separation_opts: None,
         }
@@ -331,6 +335,28 @@ impl Config {
     #[must_use]
     pub fn use_descriptor_table(mut self, descriptor_table: Option<Arc<DescriptorTable>>) -> Self {
         self.descriptor_table = descriptor_table;
+        self
+    }
+
+    /// If `true`, the last level will not build filters, reducing the filter size of a database
+    /// by ~90% typically.
+    ///
+    /// **Enable this only if you know that point reads generally are expected to find a key-value pair.**
+    #[must_use]
+    /// Build a Bloom filter over the active memtable as well as over sealed tables.
+    ///
+    /// **Off by default, and the default is not timidity.** A memtable filter is paid
+    /// for on every insert and collected on point reads that *miss*: a read for a key
+    /// that is there has to descend the skiplist anyway, so it gets nothing back. A
+    /// tree whose reads mostly hit is strictly worse off.
+    ///
+    /// Turn it on for a tree that is asked "is this key present?" about keys that
+    /// usually are not — an index being built, a deduplicating write path, anything
+    /// doing read-modify-write against mostly-new keys. There the skiplist descent it
+    /// removes is the dominant cost of writing.
+    #[must_use]
+    pub fn memtable_filter(mut self, b: bool) -> Self {
+        self.memtable_filter = b;
         self
     }
 

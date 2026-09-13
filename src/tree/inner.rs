@@ -73,6 +73,7 @@ pub struct TreeInner {
 
 impl TreeInner {
     pub(crate) fn create_new(config: Config) -> crate::Result<Self> {
+        let memtable_filter = config.memtable_filter;
         let version = Version::new(
             0,
             if config.kv_separation_opts.is_some() {
@@ -89,7 +90,7 @@ impl TreeInner {
             table_id_counter: SequenceNumberCounter::default(),
             blob_file_id_counter: SequenceNumberCounter::default(),
             config: Arc::new(config),
-            version_history: Arc::new(RwLock::new(SuperVersions::new(version))),
+            version_history: Arc::new(RwLock::new(SuperVersions::new(version, memtable_filter))),
             stop_signal: StopSignal::default(),
             major_compaction_lock: RwLock::default(),
             flush_lock: Mutex::default(),

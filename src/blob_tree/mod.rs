@@ -278,7 +278,10 @@ impl AbstractTree for BlobTree {
             |v| {
                 let mut copy = v.clone();
                 copy.active_memtable =
-                    Arc::new(Memtable::new(self.index.memtable_id_counter.next()));
+                    Arc::new(Memtable::new(
+                        self.index.memtable_id_counter.next(),
+                        self.index.config.memtable_filter,
+                    ));
                 copy.sealed_memtables = Arc::default();
                 copy.version = Version::new(v.version.id() + 1, self.tree_type());
                 Ok(copy)
