@@ -6,7 +6,7 @@ fn tree_clear() -> lsm_tree::Result<()> {
     let folder = get_tmp_folder();
 
     let seqno = SequenceNumberCounter::default();
-    let visible_seqno = SequenceNumberCounter::default();
+    let visible_seqno = lsm_tree::VisibleSeqno::default();
 
     let tree = Config::new(&folder, seqno.clone(), visible_seqno.clone()).open()?;
 
@@ -15,7 +15,7 @@ fn tree_clear() -> lsm_tree::Result<()> {
     {
         let seqno = seqno.next();
         tree.insert("a", "a", seqno);
-        visible_seqno.fetch_max(seqno + 1);
+        visible_seqno.begin(seqno).publish();
     }
 
     assert!(tree.contains_key("a", SeqNo::MAX)?);
@@ -28,7 +28,7 @@ fn tree_clear() -> lsm_tree::Result<()> {
     {
         let seqno = seqno.next();
         tree.insert("a", "a", seqno);
-        visible_seqno.fetch_max(seqno + 1);
+        visible_seqno.begin(seqno).publish();
     }
 
     tree.flush_active_memtable(0)?;

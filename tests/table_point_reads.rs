@@ -13,7 +13,7 @@ fn table_point_reads() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .data_block_size_policy(BlockSizePolicy::all(1_024))
     .open()?;
@@ -40,7 +40,7 @@ fn table_point_reads_mvcc() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .data_block_size_policy(BlockSizePolicy::all(1_024))
     .open()?;
@@ -80,7 +80,7 @@ fn table_point_reads_mvcc_slab() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .data_block_size_policy(BlockSizePolicy::all(1_024))
     .open()?;
@@ -128,7 +128,7 @@ fn blob_tree_table_point_reads_mvcc_slab() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .data_block_size_policy(BlockSizePolicy::all(1_024))
     .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(1)))

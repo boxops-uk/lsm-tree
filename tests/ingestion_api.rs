@@ -9,7 +9,7 @@ fn tree_ingestion_tombstones_delete_existing_keys() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -42,7 +42,7 @@ fn sealed_memtable_value_overrides_table_value() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -74,7 +74,7 @@ fn sealed_memtable_tombstone_overrides_table_value() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -103,7 +103,7 @@ fn tables_newest_first_returns_highest_seqno() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -134,7 +134,7 @@ fn ingestion_enforces_order_standard_panics() {
     let tree = lsm_tree::Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()
     .unwrap();
@@ -155,7 +155,7 @@ fn blob_ingestion_out_of_order_panics_without_blob_write() -> lsm_tree::Result<(
     let tree = lsm_tree::Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(8)))
     .open()?;
@@ -186,7 +186,7 @@ fn memtable_put_overrides_table_tombstone() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -220,7 +220,7 @@ fn blob_tree_ingestion_tombstones_delete_existing_keys() -> lsm_tree::Result<()>
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(1)))
     .open()?;
@@ -253,7 +253,7 @@ fn tree_ingestion_finish_no_writes_noop() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -274,7 +274,7 @@ fn blob_ingestion_only_tombstones_does_not_create_blob_files() -> lsm_tree::Resu
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(1)))
     .open()?;
@@ -311,7 +311,7 @@ fn blob_ingestion_finish_no_writes_noop() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(1)))
     .open()?;
@@ -338,7 +338,7 @@ fn blob_ingestion_separates_large_values_and_reads_ok() -> lsm_tree::Result<()> 
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(8)))
     .open()?;

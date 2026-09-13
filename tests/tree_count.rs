@@ -10,7 +10,7 @@ fn tree_memtable_count() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -43,7 +43,7 @@ fn tree_flushed_count() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -78,7 +78,7 @@ fn tree_flushed_count_blob() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(Some(Default::default()))
     .open()?;
@@ -116,7 +116,7 @@ fn tree_non_locking_count() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 

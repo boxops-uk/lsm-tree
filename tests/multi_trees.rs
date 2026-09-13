@@ -10,7 +10,7 @@ fn tree_multi_table_ids() -> lsm_tree::Result<()> {
     let tree0 = Config::new(
         &folder0,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
     assert_eq!(tree0.id(), 0);
@@ -39,7 +39,7 @@ fn tree_multi_table_ids() -> lsm_tree::Result<()> {
     let tree1 = Config::new(
         &folder1,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
     assert_eq!(tree1.id(), 1);

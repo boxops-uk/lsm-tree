@@ -13,7 +13,7 @@ fn tree_block_size_after_recovery() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .data_block_size_policy(BlockSizePolicy::all(2_048))
         // .index_block_size_policy(BlockSizePolicy::all(2_048))
@@ -36,7 +36,7 @@ fn tree_block_size_after_recovery() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .data_block_size_policy(BlockSizePolicy::all(2_048))
         // .index_block_size_policy(BlockSizePolicy::all(2_048))
@@ -48,7 +48,7 @@ fn tree_block_size_after_recovery() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .data_block_size_policy(BlockSizePolicy::all(4_096))
         // .index_block_size_policy(BlockSizePolicy::all(4_096))
@@ -60,7 +60,7 @@ fn tree_block_size_after_recovery() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .data_block_size_policy(BlockSizePolicy::all(78_652))
         // .index_block_size_policy(BlockSizePolicy::all(78_652))

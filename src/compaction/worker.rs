@@ -37,7 +37,7 @@ pub struct Options {
 
     pub global_seqno: SequenceNumberCounter,
 
-    pub visible_seqno: SequenceNumberCounter,
+    pub visible_seqno: crate::VisibleSeqno,
 
     pub table_id_generator: SequenceNumberCounter,
 
@@ -666,7 +666,7 @@ mod tests {
         let tree = crate::Config::new(
             folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -686,7 +686,7 @@ mod tests {
         let tree = crate::Config::new(
             folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -723,7 +723,7 @@ mod tests {
         let tree = crate::Config::new(
             folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -760,7 +760,7 @@ mod tests {
         let tree = crate::Config::new(
             folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -797,7 +797,7 @@ mod tests {
         let tree = crate::Config::new(
             folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -833,7 +833,7 @@ mod tests {
         let tree = crate::Config::new(
             folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -883,7 +883,7 @@ mod tests {
         let tree = crate::Config::new(
             folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .data_block_size_policy(BlockSizePolicy::all(1))
         .with_kv_separation(Some(

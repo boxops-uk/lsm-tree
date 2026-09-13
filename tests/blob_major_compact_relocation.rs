@@ -16,7 +16,7 @@ fn blob_tree_major_compact_relocation_simple() -> lsm_tree::Result<()> {
         let tree = lsm_tree::Config::new(
             path,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(
             KvSeparationOptions::default()
@@ -111,7 +111,7 @@ fn blob_tree_major_compact_relocation_repeated_key() -> lsm_tree::Result<()> {
         let tree = lsm_tree::Config::new(
             path,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(
             KvSeparationOptions::default()
@@ -224,7 +224,7 @@ fn blob_tree_major_compact_relocation_interleaved() -> lsm_tree::Result<()> {
         let tree = lsm_tree::Config::new(
             path,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(
             KvSeparationOptions::default()

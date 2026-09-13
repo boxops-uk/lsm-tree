@@ -12,7 +12,7 @@ fn ingestion_autoflushes_active_memtable() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -54,7 +54,7 @@ fn ingestion_flushes_sealed_memtables() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -94,7 +94,7 @@ fn ingestion_blocks_memtable_writes_until_finish() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -137,7 +137,7 @@ fn blob_ingestion_honors_invariants_and_blocks_writes() -> lsm_tree::Result<()> 
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(1)))
     .open()?;

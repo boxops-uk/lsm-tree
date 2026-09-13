@@ -10,7 +10,7 @@ fn tree_weak_remove_flush_eviction() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 

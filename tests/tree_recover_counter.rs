@@ -9,7 +9,7 @@ fn tree_recover_table_counter() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -26,7 +26,7 @@ fn tree_recover_table_counter() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
         assert_eq!(counter_expected, tree.next_table_id());

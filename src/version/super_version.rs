@@ -118,7 +118,7 @@ impl SuperVersions {
         tree_path: &Path,
         f: F,
         seqno: &SequenceNumberCounter,
-        visible_seqno: &SequenceNumberCounter,
+        visible_seqno: &crate::VisibleSeqno,
     ) -> crate::Result<()> {
         self.upgrade_version_with_seqno(tree_path, f, seqno.next(), visible_seqno)
     }
@@ -134,8 +134,17 @@ impl SuperVersions {
         tree_path: &Path,
         f: F,
         seqno: SeqNo,
-        visible_seqno: &SequenceNumberCounter,
+        visible_seqno: &crate::VisibleSeqno,
     ) -> crate::Result<()> {
+        // **Taken before the version can be observed missing.** A version upgrade is a
+        // write like any other as far as a reader is concerned: it holds a sequence
+        // number, and until it is installed nobody may see that far. Compaction and
+        // memtable rotation run on their own threads, so without this a background job
+        // could advance the watermark past a batch that is still applying.
+        //
+        // Every `?` below hands the number back on the way out — see `Pending`.
+        let pending = visible_seqno.begin(seqno);
+
         let mut next_version = f(&self.latest_version())?;
         next_version.seqno = seqno;
         log::trace!("Next version seqno={}", next_version.seqno);
@@ -143,7 +152,7 @@ impl SuperVersions {
         persist_version(tree_path, &next_version.version)?;
         self.append_version(next_version);
 
-        visible_seqno.fetch_max(seqno + 1);
+        pending.publish();
 
         Ok(())
     }

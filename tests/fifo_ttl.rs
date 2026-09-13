@@ -10,7 +10,7 @@ fn fifo_ttl_no_drop_when_recent_or_disabled() -> lsm_tree::Result<()> {
     let tree = Config::new(
         dir.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -41,7 +41,7 @@ fn fifo_below_limit_no_drop_standard() -> lsm_tree::Result<()> {
     let tree = Config::new(
         dir.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -64,7 +64,7 @@ fn fifo_limit_considers_blob_bytes() -> lsm_tree::Result<()> {
     let tree = Config::new(
         dir.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(1)))
     .open()?;
@@ -94,7 +94,7 @@ fn fifo_compact_empty_tree_noop() -> lsm_tree::Result<()> {
     let tree = Config::new(
         dir.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -112,7 +112,7 @@ fn fifo_idempotent_when_within_limits() -> lsm_tree::Result<()> {
     let tree = Config::new(
         dir.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 

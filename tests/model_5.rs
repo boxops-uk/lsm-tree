@@ -16,7 +16,7 @@ fn model_5() -> Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(5)))
     .data_block_size_policy(BlockSizePolicy::all(100))

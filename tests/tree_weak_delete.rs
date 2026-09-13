@@ -10,7 +10,7 @@ fn tree_weak_delete_simple() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -42,7 +42,7 @@ fn tree_weak_delete_flush() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -68,7 +68,7 @@ fn tree_weak_delete_semi_flush() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -96,7 +96,7 @@ fn tree_weak_delete_flush_point_read() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -122,7 +122,7 @@ fn tree_weak_delete_semi_flush_point_read() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -150,7 +150,7 @@ fn tree_weak_delete_resurrection() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 

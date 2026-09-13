@@ -8,7 +8,7 @@ fn tree_builds_filters() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .expect_point_read_hits(false)
     .open()?;
@@ -31,7 +31,7 @@ fn tree_expect_point_read_hits() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .expect_point_read_hits(true)
     .open()?;

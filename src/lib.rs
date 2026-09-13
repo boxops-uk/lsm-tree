@@ -129,6 +129,7 @@ pub mod range;
 pub mod table;
 
 mod seqno;
+mod visible_seqno;
 mod slice;
 mod slice_windows;
 
@@ -184,6 +185,7 @@ pub use {
     iter_guard::IterGuard as Guard,
     memtable::{Memtable, MemtableId},
     seqno::SequenceNumberCounter,
+    visible_seqno::{Pending, VisibleSeqno},
     slice::Slice,
     tree::Tree,
     value::SeqNo,

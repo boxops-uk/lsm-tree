@@ -106,7 +106,7 @@ fn filter_basic(blob: bool) -> lsm_tree::Result<()> {
     let mut config = lsm_tree::Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(if blob {
         Some(KvSeparationOptions::default().separation_threshold(2))

@@ -11,7 +11,7 @@ fn tree_flush_eviction_1() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -36,7 +36,7 @@ fn tree_flush_eviction_2() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -61,7 +61,7 @@ fn tree_flush_eviction_3() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -91,7 +91,7 @@ fn tree_flush_eviction_4() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 

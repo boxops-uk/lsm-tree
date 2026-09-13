@@ -13,7 +13,7 @@ fn model_3() -> Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(5)))
     .open()?;

@@ -6,7 +6,7 @@ fn tree_clear_snapshot() -> lsm_tree::Result<()> {
     let folder = get_tmp_folder();
 
     let seqno = SequenceNumberCounter::default();
-    let visible_seqno = SequenceNumberCounter::default();
+    let visible_seqno = lsm_tree::VisibleSeqno::default();
 
     let tree = Config::new(&folder, seqno.clone(), visible_seqno.clone()).open()?;
 
@@ -15,7 +15,7 @@ fn tree_clear_snapshot() -> lsm_tree::Result<()> {
     for c in ["a", "b", "c"] {
         let seqno = seqno.next();
         tree.insert(c, c, seqno);
-        visible_seqno.fetch_max(seqno + 1);
+        visible_seqno.begin(seqno).publish();
     }
     assert_eq!(3, tree.len(visible_seqno.get(), None)?);
 

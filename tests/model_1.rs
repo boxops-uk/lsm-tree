@@ -13,7 +13,7 @@ fn model_1() -> Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
     let compaction = Arc::new(lsm_tree::compaction::Leveled::default());

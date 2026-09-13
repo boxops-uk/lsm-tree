@@ -8,7 +8,7 @@ fn tree_shadowing_upsert() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -44,7 +44,7 @@ fn tree_shadowing_upsert_blob() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(Some(Default::default()))
     .open()?;
@@ -81,7 +81,7 @@ fn tree_shadowing_delete() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()
     .unwrap();
@@ -116,7 +116,7 @@ fn tree_shadowing_delete_blob() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(Some(Default::default()))
     .open()?;
@@ -152,7 +152,7 @@ fn tree_shadowing_range() -> lsm_tree::Result<()> {
 
     let seqno = SequenceNumberCounter::default();
 
-    let tree = Config::new(&folder, seqno.clone(), SequenceNumberCounter::default()).open()?;
+    let tree = Config::new(&folder, seqno.clone(), lsm_tree::VisibleSeqno::default()).open()?;
 
     for x in 0..ITEM_COUNT as u64 {
         let key = x.to_be_bytes();
@@ -196,7 +196,7 @@ fn tree_shadowing_range_blob() -> lsm_tree::Result<()> {
 
     let seqno = SequenceNumberCounter::default();
 
-    let tree = Config::new(&folder, seqno.clone(), SequenceNumberCounter::default())
+    let tree = Config::new(&folder, seqno.clone(), lsm_tree::VisibleSeqno::default())
         .with_kv_separation(Some(Default::default()))
         .open()?;
 
@@ -242,7 +242,7 @@ fn tree_shadowing_prefix() -> lsm_tree::Result<()> {
 
     let seqno = SequenceNumberCounter::default();
 
-    let tree = Config::new(&folder, seqno.clone(), SequenceNumberCounter::default()).open()?;
+    let tree = Config::new(&folder, seqno.clone(), lsm_tree::VisibleSeqno::default()).open()?;
 
     for x in 0..ITEM_COUNT as u64 {
         let value = "old".as_bytes();
@@ -314,7 +314,7 @@ fn tree_shadowing_prefix_blob() -> lsm_tree::Result<()> {
 
     let seqno = SequenceNumberCounter::default();
 
-    let tree = Config::new(&folder, seqno.clone(), SequenceNumberCounter::default())
+    let tree = Config::new(&folder, seqno.clone(), lsm_tree::VisibleSeqno::default())
         .with_kv_separation(Some(Default::default()))
         .open()?;
 

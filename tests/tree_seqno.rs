@@ -8,7 +8,7 @@ fn tree_highest_seqno() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
     assert_eq!(tree.get_highest_seqno(), None);

@@ -17,7 +17,7 @@ fn blob_register_table_rotation() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .data_block_size_policy(BlockSizePolicy::all(1))
     .with_kv_separation(Some(
@@ -72,7 +72,7 @@ fn blob_register_table_rotation_relocation() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         path,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .data_block_size_policy(BlockSizePolicy::all(1))
     .with_kv_separation(Some(

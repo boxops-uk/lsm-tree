@@ -9,7 +9,7 @@ fn tree_recovery_cleanup_orphans() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
         tree.insert("a", "a", 0);
@@ -28,7 +28,7 @@ fn tree_recovery_cleanup_orphans() -> lsm_tree::Result<()> {
         let _tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -46,8 +46,8 @@ fn tree_recovery_cleanup_orphans_blob() -> lsm_tree::Result<()> {
     {
         let tree = Config::new(
             &folder,
-            SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(
             KvSeparationOptions::default()
@@ -77,7 +77,7 @@ fn tree_recovery_cleanup_orphans_blob() -> lsm_tree::Result<()> {
         let _tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(Default::default()))
         .open()?;

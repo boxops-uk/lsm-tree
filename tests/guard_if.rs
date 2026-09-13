@@ -11,7 +11,7 @@ fn guard_into_inner_if() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -44,7 +44,7 @@ fn guard_into_inner_if_blob() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(1)))
         .open()?;

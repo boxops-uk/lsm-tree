@@ -16,7 +16,7 @@ fn blob_tree_recover_gc_stats() -> lsm_tree::Result<()> {
         let tree = lsm_tree::Config::new(
             path,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(
             KvSeparationOptions::default().compression(lsm_tree::CompressionType::None),
@@ -59,7 +59,7 @@ fn blob_tree_recover_gc_stats() -> lsm_tree::Result<()> {
         let tree = lsm_tree::Config::new(
             path,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(Default::default()))
         .open()?;

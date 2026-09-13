@@ -48,7 +48,7 @@ fn compaction_filter_gc_stats_change() -> lsm_tree::Result<()> {
         let tree = lsm_tree::Config::new(
             path,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(
             KvSeparationOptions::default().compression(lsm_tree::CompressionType::None),
@@ -133,7 +133,7 @@ fn compaction_filter_gc_stats_change_non_blob() -> lsm_tree::Result<()> {
         let tree = lsm_tree::Config::new(
             path,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(
             KvSeparationOptions::default().compression(lsm_tree::CompressionType::None),
@@ -210,7 +210,7 @@ fn compaction_filter_gc_stats_change_blob_writer_rotation() -> lsm_tree::Result<
         let tree = lsm_tree::Config::new(
             path,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(
             KvSeparationOptions::default()

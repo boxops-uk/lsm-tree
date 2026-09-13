@@ -8,7 +8,7 @@ fn tree_l0_range_blob() -> lsm_tree::Result<()> {
     let tree = lsm_tree::Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .with_kv_separation(Some(Default::default()))
     .open()?;

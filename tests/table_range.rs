@@ -13,7 +13,7 @@ fn a_lot_of_ranges() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .data_block_size_policy(BlockSizePolicy::all(1_024))
     // .index_block_size_policy(BlockSizePolicy::all(1_024))
@@ -75,7 +75,7 @@ fn table_range_last_back() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .data_block_size_policy(BlockSizePolicy::all(1_024))
     // .index_block_size_policy(BlockSizePolicy::all(1_024))
@@ -114,7 +114,7 @@ fn table_range_last_back_2() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .data_block_size_policy(BlockSizePolicy::all(1_024))
     // .index_block_size_policy(BlockSizePolicy::all(1_024))

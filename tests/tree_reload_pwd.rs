@@ -12,7 +12,7 @@ fn tree_reload_pwd() -> lsm_tree::Result<()> {
 
     {
         let tree =
-            Config::new(&folder_old, seqno.clone(), SequenceNumberCounter::default()).open()?;
+            Config::new(&folder_old, seqno.clone(), lsm_tree::VisibleSeqno::default()).open()?;
 
         for x in 0..ITEM_COUNT as u64 {
             let key = x.to_be_bytes();
@@ -40,7 +40,7 @@ fn tree_reload_pwd() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder_new_subfolder,
             seqno,
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
         assert_eq!(ITEM_COUNT, tree.len(SeqNo::MAX, None)?);

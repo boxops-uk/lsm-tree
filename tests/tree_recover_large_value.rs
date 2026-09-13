@@ -9,7 +9,7 @@ fn tree_recover_large_value() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
         tree.insert("a", "a".repeat(100_000), 0);
@@ -20,7 +20,7 @@ fn tree_recover_large_value() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
         assert_eq!(

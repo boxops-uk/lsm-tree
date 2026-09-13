@@ -18,7 +18,7 @@ fn tree_disjoint_iter() -> lsm_tree::Result<()> {
     let tree = crate::Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 

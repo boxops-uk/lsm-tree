@@ -13,7 +13,7 @@ fn recover_from_different_folder() -> lsm_tree::Result<()> {
         let tree = Config::new(
             folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -32,7 +32,7 @@ fn recover_from_different_folder() -> lsm_tree::Result<()> {
         let _tree = Config::new(
             folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
     }
@@ -45,8 +45,8 @@ fn recover_from_different_folder() -> lsm_tree::Result<()> {
     {
         let tree = Config::new(
             &absolute_folder,
-            SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -65,7 +65,7 @@ fn recover_from_different_folder() -> lsm_tree::Result<()> {
         let _tree = Config::new(
             &absolute_folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
     }

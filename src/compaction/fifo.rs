@@ -164,7 +164,7 @@ mod tests {
         let tree = Config::new(
             dir.path(),
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -181,7 +181,7 @@ mod tests {
         let tree = Config::new(
             dir.path(),
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -204,7 +204,7 @@ mod tests {
         let tree = Config::new(
             dir.path(),
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -228,7 +228,7 @@ mod tests {
         let tree = Config::new(
             dir.path(),
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(1)))
         .open()?;
@@ -252,7 +252,7 @@ mod tests {
         let tree = Config::new(
             dir.path(),
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -287,7 +287,7 @@ mod tests {
         let tree = Config::new(
             dir.path(),
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(1)))
         .open()?;

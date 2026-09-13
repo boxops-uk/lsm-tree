@@ -275,7 +275,7 @@ mod tests {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .data_block_compression_policy(CompressionPolicy::all(crate::CompressionType::None))
         .index_block_compression_policy(CompressionPolicy::all(crate::CompressionType::None))
@@ -307,7 +307,7 @@ mod tests {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .data_block_compression_policy(CompressionPolicy::all(crate::CompressionType::None))
         .index_block_compression_policy(CompressionPolicy::all(crate::CompressionType::None))

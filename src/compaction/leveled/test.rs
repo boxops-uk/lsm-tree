@@ -9,7 +9,7 @@ fn leveled_empty_levels() -> crate::Result<()> {
     let tree = Config::new(
         dir.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        crate::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -26,7 +26,7 @@ fn leveled_l0_below_limit() -> crate::Result<()> {
     let tree = Config::new(
         dir.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        crate::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -52,7 +52,7 @@ fn leveled_l0_reached_limit() -> crate::Result<()> {
     let tree = Config::new(
         dir.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        crate::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -80,7 +80,7 @@ fn leveled_l0_reached_limit_disjoint() -> crate::Result<()> {
     let tree = Config::new(
         dir.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        crate::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -105,7 +105,7 @@ fn leveled_l0_reached_limit_disjoint_l1() -> crate::Result<()> {
     let tree = Config::new(
         dir.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        crate::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -143,7 +143,7 @@ fn leveled_sequential_inserts() -> crate::Result<()> {
     let tree = Config::new(
         dir.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        crate::VisibleSeqno::default(),
     )
     .open()?;
 

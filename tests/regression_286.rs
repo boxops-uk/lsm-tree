@@ -9,7 +9,7 @@ fn regression_286() -> lsm_tree::Result<()> {
         let tree = lsm_tree::Config::new(
             &folder,
             seqno.clone(),
-            lsm_tree::SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(lsm_tree::KvSeparationOptions::default()))
         .open()?;
@@ -22,7 +22,7 @@ fn regression_286() -> lsm_tree::Result<()> {
         let _tree = lsm_tree::Config::new(
             &folder,
             seqno.clone(),
-            lsm_tree::SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(lsm_tree::KvSeparationOptions::default()))
         .open()?;

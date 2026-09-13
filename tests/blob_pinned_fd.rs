@@ -12,7 +12,7 @@ fn blob_tree_with_pinned_fd() -> lsm_tree::Result<()> {
         let tree = lsm_tree::Config::new(
             path,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .use_descriptor_table(None)
         .with_kv_separation(Some(
@@ -38,7 +38,7 @@ fn blob_tree_with_pinned_fd() -> lsm_tree::Result<()> {
         let tree = lsm_tree::Config::new(
             path,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .use_descriptor_table(None)
         .with_kv_separation(Some(Default::default()))

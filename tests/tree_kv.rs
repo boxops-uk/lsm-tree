@@ -9,7 +9,7 @@ fn tree_first_last_kv() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
 
@@ -62,7 +62,7 @@ fn tree_first_last_kv() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
         assert_eq!(1, tree.len(SeqNo::MAX, None)?);
@@ -136,7 +136,7 @@ fn tree_first_last_kv() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .open()?;
         assert_eq!(3, tree.len(SeqNo::MAX, None)?);

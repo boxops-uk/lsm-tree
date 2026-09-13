@@ -12,7 +12,7 @@ fn table_range_out_of_bounds_lo() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .data_block_size_policy(BlockSizePolicy::all(1_024))
     .open()?;
@@ -39,7 +39,7 @@ fn table_range_out_of_bounds_hi() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     // .index_block_size_policy(BlockSizePolicy::all(1_024))
     .open()?;

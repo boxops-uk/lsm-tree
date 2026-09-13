@@ -39,7 +39,7 @@ mod tests {
         let tree = crate::Config::new(
             folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .open()?;
 

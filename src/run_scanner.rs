@@ -84,7 +84,7 @@ mod tests {
         let tree = crate::Config::new(
             &tempdir,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            crate::VisibleSeqno::default(),
         )
         .open()?;
 

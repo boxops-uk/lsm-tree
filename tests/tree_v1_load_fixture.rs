@@ -8,7 +8,7 @@ fn tree_load_v1() -> lsm_tree::Result<()> {
     let result = Config::new(
         folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open();
 
@@ -24,7 +24,7 @@ fn tree_load_v1_corrupt() -> lsm_tree::Result<()> {
     let result = Config::new(
         folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open();
 

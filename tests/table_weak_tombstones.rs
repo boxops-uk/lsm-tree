@@ -7,7 +7,7 @@ fn weak_tombstone_counts_single_pair() -> lsm_tree::Result<()> {
     let tree = Config::new(
         folder.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -28,7 +28,7 @@ fn weak_tombstone_counts_multiple_keys() -> lsm_tree::Result<()> {
     let tree = Config::new(
         folder.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 
@@ -56,7 +56,7 @@ fn weak_tombstone_counts_multiple_weak() -> lsm_tree::Result<()> {
     let tree = Config::new(
         folder.path(),
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .open()?;
 

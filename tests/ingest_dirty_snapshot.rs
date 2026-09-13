@@ -5,7 +5,7 @@ fn ingestion_dirty_snapshot() -> lsm_tree::Result<()> {
     let folder = get_tmp_folder();
 
     let seqno = SequenceNumberCounter::default();
-    let tree = Config::new(&folder, seqno.clone(), SequenceNumberCounter::default()).open()?;
+    let tree = Config::new(&folder, seqno.clone(), lsm_tree::VisibleSeqno::default()).open()?;
 
     tree.insert("a", "a", seqno.next());
     tree.insert("a", "b", seqno.next());

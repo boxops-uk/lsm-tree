@@ -10,7 +10,7 @@ fn tree_non_disjoint_point_read() -> lsm_tree::Result<()> {
     let tree = Config::new(
         &folder,
         SequenceNumberCounter::default(),
-        SequenceNumberCounter::default(),
+        lsm_tree::VisibleSeqno::default(),
     )
     .data_block_size_policy(BlockSizePolicy::all(1_024))
     // .index_block_size_policy(BlockSizePolicy::all(1_024))

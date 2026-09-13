@@ -35,7 +35,7 @@ fn compaction_filter_snapshot() -> lsm_tree::Result<()> {
     let folder = get_tmp_folder();
 
     let seqno = SequenceNumberCounter::default();
-    let config = lsm_tree::Config::new(&folder, seqno.clone(), SequenceNumberCounter::default())
+    let config = lsm_tree::Config::new(&folder, seqno.clone(), lsm_tree::VisibleSeqno::default())
         .with_compaction_filter_factory(Some(Arc::new(NukeFilterFactory)));
     let tree = config.open()?;
 

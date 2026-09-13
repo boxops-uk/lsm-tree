@@ -10,7 +10,7 @@ fn blob_file_full_file_checksum() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(1)))
         .open()?;
@@ -36,7 +36,7 @@ fn blob_file_full_file_checksum() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(1)))
         .open()?;
@@ -63,7 +63,7 @@ fn blob_file_full_file_detect_corruption() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(1)))
         .open()?;
@@ -89,7 +89,7 @@ fn blob_file_full_file_detect_corruption() -> lsm_tree::Result<()> {
         let tree = Config::new(
             &folder,
             SequenceNumberCounter::default(),
-            SequenceNumberCounter::default(),
+            lsm_tree::VisibleSeqno::default(),
         )
         .with_kv_separation(Some(KvSeparationOptions::default().separation_threshold(1)))
         .open()?;
