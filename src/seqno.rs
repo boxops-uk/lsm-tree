@@ -74,6 +74,26 @@ impl SequenceNumberCounter {
         seqno
     }
 
+    /// Takes `n` sequence numbers at once and returns the first.
+    ///
+    /// **For a writer handing numbers out to a group in order.** Taking them one at a
+    /// time would work only while something else guaranteed no other writer could
+    /// interleave; this needs no such guarantee, and the run it returns is contiguous
+    /// by construction, which is what lets a group be tracked as one range.
+    #[must_use]
+    #[allow(clippy::missing_panics_doc, reason = "we should never run out of u64s")]
+    pub fn next_n(&self, n: u64) -> SeqNo {
+        let seqno = self.0.fetch_add(n, AcqRel);
+
+        // The MSB is reserved for transactions.
+        assert!(
+            seqno.saturating_add(n) < 0x8000_0000_0000_0000,
+            "Ran out of sequence numbers"
+        );
+
+        seqno
+    }
+
     /// Sets the sequence number.
     pub fn set(&self, seqno: SeqNo) {
         self.0.store(seqno, Release);

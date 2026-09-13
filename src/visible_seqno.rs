@@ -68,14 +68,28 @@ impl VisibleSeqno {
     #[must_use = "the watermark cannot pass this sequence number until it is finished, \
                   so dropping it immediately is the same as not calling begin at all"]
     pub fn begin(&self, seqno: SeqNo) -> Pending {
+        self.begin_range(seqno, 1)
+    }
+
+    /// Take the whole run `[base, base + count)` out of circulation at once.
+    ///
+    /// **For a writer that hands out sequence numbers in order.** A group commit assigns
+    /// a contiguous run to the writes it batched, and they land in whatever order those
+    /// writers get scheduled — but a reader may only see the run once *all* of it has
+    /// landed, so the run is one unit here rather than `count` of them. That collapses
+    /// the bookkeeping from a set entry per write to a single entry per group, which is
+    /// the difference between a lock on the write path and a lock on the batch path.
+    #[must_use = "the watermark cannot pass this run until it is finished"]
+    pub fn begin_range(&self, base: SeqNo, count: u64) -> Pending {
         #[expect(clippy::expect_used)]
         let mut in_flight = self.0.in_flight.lock().expect("lock is poisoned");
-        in_flight.taken.insert(seqno);
+        in_flight.taken.insert(base);
         drop(in_flight);
 
         Pending {
             gate: self.clone(),
-            seqno,
+            seqno: base,
+            through: base + count.saturating_sub(1),
         }
     }
 
@@ -84,12 +98,12 @@ impl VisibleSeqno {
         self.0.visible.fetch_max(seqno, AcqRel);
     }
 
-    fn finish(&self, seqno: SeqNo) {
+    fn finish(&self, seqno: SeqNo, through: SeqNo) {
         #[expect(clippy::expect_used)]
         let mut in_flight = self.0.in_flight.lock().expect("lock is poisoned");
 
         in_flight.taken.remove(&seqno);
-        in_flight.done = in_flight.done.max(seqno);
+        in_flight.done = in_flight.done.max(through);
 
         // Everything below the lowest number still being applied has landed, so that is
         // how far a reader may see. With nothing in flight, everything finished has.
@@ -116,13 +130,21 @@ impl VisibleSeqno {
 pub struct Pending {
     gate: VisibleSeqno,
     seqno: SeqNo,
+    /// The last sequence number of the run — equal to `seqno` for a lone write.
+    through: SeqNo,
 }
 
 impl Pending {
-    /// The sequence number this write is carrying.
+    /// The first sequence number of the run this is holding.
     #[must_use]
     pub fn seqno(&self) -> SeqNo {
         self.seqno
+    }
+
+    /// The last sequence number of the run.
+    #[must_use]
+    pub fn through(&self) -> SeqNo {
+        self.through
     }
 
     /// The rows are readable; let the watermark reach them when the queue allows.
@@ -133,7 +155,7 @@ impl Pending {
 
 impl Drop for Pending {
     fn drop(&mut self) {
-        self.gate.finish(self.seqno);
+        self.gate.finish(self.seqno, self.through);
     }
 }
 
@@ -202,6 +224,27 @@ mod tests {
         ok.publish();
 
         assert_eq!(7, gate.get(), "a dropped write held the watermark");
+    }
+
+    /// **A group is one unit.** The run is invisible until all of it has landed, and
+    /// then visible all at once — which is what lets a group commit hand out sequence
+    /// numbers in order and let its members finish in any order at all.
+    #[test]
+    fn a_run_becomes_visible_as_a_whole_or_not_at_all() {
+        let gate = VisibleSeqno::default();
+
+        let first = gate.begin_range(5, 6); // 5..=10
+        let second = gate.begin_range(11, 5); // 11..=15
+
+        second.publish();
+        assert!(
+            gate.get() <= 5,
+            "the second group published over the first, at {}",
+            gate.get()
+        );
+
+        first.publish();
+        assert_eq!(16, gate.get(), "both runs become visible together");
     }
 
     #[test]
