@@ -11,16 +11,39 @@ use crossbeam_skiplist::SkipMap;
 use std::ops::RangeBounds;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering::Relaxed};
 
-/// A memtable's key filter, in 64-byte blocks — 1 MiB, about eight bits a key for a
-/// default 64 MiB memtable of small rows.
-///
-/// A guess, and the thing to fix before this is proposed anywhere: the memtable is
-/// bounded in *bytes* and a filter wants a count, so the honest version derives this
-/// from `max_memtable_size` rather than assuming a row size.
-const FILTER_BLOCKS: usize = 16 * 1_024;
 /// One cache line, as [`u64`]s.
 const BLOCK_WORDS: usize = 8;
 const FILTER_PROBES: u32 = 4;
+
+/// Bits of filter per key the memtable is expected to hold.
+///
+/// Eight is the usual place to sit: a blocked filter at eight bits a key costs a few
+/// percent false positives, and a false positive here costs a skiplist descent that
+/// would otherwise have happened anyway.
+const BITS_PER_KEY: usize = 8;
+
+/// What one entry is assumed to cost, to turn a byte budget into a key count.
+///
+/// **The remaining guess, and it is now only a constant factor rather than the whole
+/// answer.** A memtable is bounded in bytes and a filter is sized in keys, so something
+/// has to bridge them; a caller that knows its rows are far from this can pass a budget
+/// that says so. What it replaced was worse — a fixed 1 MiB whatever the budget, which
+/// is about right at the 64 MiB default and wrong in both directions anywhere else.
+const ASSUMED_ENTRY_BYTES: usize = 64;
+
+/// Smallest and largest filter, so a pathological budget cannot ask for a useless one or
+/// an enormous one.
+const MIN_FILTER_BLOCKS: usize = 256; // 16 KiB
+const MAX_FILTER_BLOCKS: usize = 128 * 1_024; // 8 MiB
+
+/// How many 64-byte blocks a memtable of `budget` bytes should filter with.
+fn filter_blocks(budget: usize) -> usize {
+    let keys = budget / ASSUMED_ENTRY_BYTES;
+    let bits = keys * BITS_PER_KEY;
+    let blocks = bits.div_ceil(BLOCK_WORDS * 64);
+
+    blocks.clamp(MIN_FILTER_BLOCKS, MAX_FILTER_BLOCKS)
+}
 
 /// **A blocked Bloom filter over the user keys a memtable holds.**
 ///
@@ -47,16 +70,18 @@ const FILTER_PROBES: u32 = 4;
 /// sequence number that published it — which orders it after both. A reader racing an
 /// unpublished write may see either answer, which is what racing means.
 pub struct KeyFilter {
-    /// `FILTER_BLOCKS` blocks of `BLOCK_WORDS` words, laid out flat.
+    /// `blocks` blocks of `BLOCK_WORDS` words, laid out flat.
     bits: Box<[AtomicU64]>,
+    blocks: usize,
 }
 
 impl KeyFilter {
-    fn new() -> Self {
+    fn new(budget: usize) -> Self {
+        let blocks = filter_blocks(budget);
+
         Self {
-            bits: (0..FILTER_BLOCKS * BLOCK_WORDS)
-                .map(|_| AtomicU64::new(0))
-                .collect(),
+            bits: (0..blocks * BLOCK_WORDS).map(|_| AtomicU64::new(0)).collect(),
+            blocks,
         }
     }
 
@@ -64,9 +89,9 @@ impl KeyFilter {
     ///
     /// One hash for everything: the high bits choose the block, the low bits walk the
     /// probes within it (Kirsch-Mitzenmacher), so `k` probes cost one hash of the key.
-    fn probes(key: &[u8]) -> (usize, [u64; BLOCK_WORDS]) {
+    fn probes(&self, key: &[u8]) -> (usize, [u64; BLOCK_WORDS]) {
         let hash = crate::hash::hash64(key);
-        let block = ((hash >> 32) as usize) % FILTER_BLOCKS;
+        let block = ((hash >> 32) as usize) % self.blocks;
 
         let (h1, h2) = (hash as u32 as u64, ((hash >> 16) as u32 as u64) | 1);
         let mut masks = [0u64; BLOCK_WORDS];
@@ -81,7 +106,7 @@ impl KeyFilter {
     }
 
     fn set(&self, key: &[u8]) {
-        let (at, masks) = Self::probes(key);
+        let (at, masks) = self.probes(key);
 
         for (word, mask) in masks.iter().enumerate() {
             if *mask != 0 {
@@ -92,7 +117,7 @@ impl KeyFilter {
 
     /// `false` is authoritative: the key was never inserted.
     fn might_hold(&self, key: &[u8]) -> bool {
-        let (at, masks) = Self::probes(key);
+        let (at, masks) = self.probes(key);
 
         masks.iter().enumerate().all(|(word, mask)| {
             *mask == 0 || self.bits[at + word].load(Relaxed) & *mask == *mask
@@ -154,14 +179,14 @@ impl Memtable {
 
     #[doc(hidden)]
     #[must_use]
-    pub fn new(id: MemtableId, filtered: bool) -> Self {
+    pub fn new(id: MemtableId, filter_budget: Option<usize>) -> Self {
         Self {
             id,
             items: SkipMap::default(),
             approximate_size: AtomicU64::default(),
             highest_seqno: AtomicU64::default(),
             requested_rotation: AtomicBool::default(),
-            filter: filtered.then(KeyFilter::new),
+            filter: filter_budget.map(KeyFilter::new),
         }
     }
 
@@ -303,7 +328,7 @@ mod tests {
     #[test]
     #[expect(clippy::unwrap_used)]
     fn memtable_mvcc_point_read() {
-        let memtable = Memtable::new(0, true);
+        let memtable = Memtable::new(0, Some(64 * 1_024 * 1_024));
 
         memtable.insert(InternalValue::from_components(
             *b"hello-key-999991",
@@ -346,7 +371,7 @@ mod tests {
 
     #[test]
     fn memtable_get() {
-        let memtable = Memtable::new(0, true);
+        let memtable = Memtable::new(0, Some(64 * 1_024 * 1_024));
 
         let value =
             InternalValue::from_components(b"abc".to_vec(), b"abc".to_vec(), 0, ValueType::Value);
@@ -358,7 +383,7 @@ mod tests {
 
     #[test]
     fn memtable_get_highest_seqno() {
-        let memtable = Memtable::new(0, true);
+        let memtable = Memtable::new(0, Some(64 * 1_024 * 1_024));
 
         memtable.insert(InternalValue::from_components(
             b"abc".to_vec(),
@@ -404,7 +429,7 @@ mod tests {
 
     #[test]
     fn memtable_get_prefix() {
-        let memtable = Memtable::new(0, true);
+        let memtable = Memtable::new(0, Some(64 * 1_024 * 1_024));
 
         memtable.insert(InternalValue::from_components(
             b"abc0".to_vec(),
@@ -442,7 +467,7 @@ mod tests {
 
     #[test]
     fn memtable_get_old_version() {
-        let memtable = Memtable::new(0, true);
+        let memtable = Memtable::new(0, Some(64 * 1_024 * 1_024));
 
         memtable.insert(InternalValue::from_components(
             b"abc".to_vec(),
@@ -492,5 +517,37 @@ mod tests {
             )),
             memtable.get(b"abc", 50)
         );
+    }
+}
+
+#[cfg(test)]
+mod filter_sizing {
+    use super::*;
+    use test_log::test;
+
+    /// **The filter follows the budget, which is the whole point of taking one.**
+    #[test]
+    fn a_bigger_memtable_gets_a_bigger_filter() {
+        let small = filter_blocks(4 * 1_024 * 1_024);
+        let default = filter_blocks(64 * 1_024 * 1_024);
+        let large = filter_blocks(512 * 1_024 * 1_024);
+
+        assert!(small < default, "{small} !< {default}");
+        assert!(default < large, "{default} !< {large}");
+
+        // The default lands near the 1 MiB this used to hardcode — which is why that
+        // constant looked fine until someone changed `max_memtable_size`.
+        let bytes = default * BLOCK_WORDS * 8;
+        assert!(
+            (768 * 1_024..=1_536 * 1_024).contains(&bytes),
+            "the default budget should still want about a megabyte, got {bytes}"
+        );
+    }
+
+    /// A budget of nothing still gets a usable filter rather than a zero-sized one.
+    #[test]
+    fn a_tiny_budget_is_clamped_rather_than_degenerate() {
+        assert_eq!(MIN_FILTER_BLOCKS, filter_blocks(0));
+        assert_eq!(MAX_FILTER_BLOCKS, filter_blocks(usize::MAX / 2));
     }
 }

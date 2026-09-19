@@ -223,8 +223,9 @@ pub struct Config {
     /// by ~90% typically
     pub(crate) expect_point_read_hits: bool,
 
-    /// Build a Bloom filter over the **active memtable**, not only over sealed tables.
-    pub(crate) memtable_filter: bool,
+    /// Build a Bloom filter over the **active memtable**, sized for this many bytes of
+    /// memtable — not only over sealed tables.
+    pub(crate) memtable_filter: Option<usize>,
 
     /// Filter construction policy
     pub filter_policy: FilterPolicy,
@@ -295,7 +296,7 @@ impl Default for Config {
             compaction_filter_factory: None,
 
             expect_point_read_hits: false,
-            memtable_filter: false,
+            memtable_filter: None,
 
             kv_separation_opts: None,
         }
@@ -354,9 +355,12 @@ impl Config {
     /// usually are not — an index being built, a deduplicating write path, anything
     /// doing read-modify-write against mostly-new keys. There the skiplist descent it
     /// removes is the dominant cost of writing.
+    /// `Some(budget)` sizes the filter for a memtable of that many bytes; `None` builds
+    /// none. The budget is the caller's own rotation threshold — this crate does not
+    /// enforce one, so it cannot know it.
     #[must_use]
-    pub fn memtable_filter(mut self, b: bool) -> Self {
-        self.memtable_filter = b;
+    pub fn memtable_filter(mut self, budget: Option<usize>) -> Self {
+        self.memtable_filter = budget;
         self
     }
 
