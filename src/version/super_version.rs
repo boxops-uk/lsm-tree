@@ -29,7 +29,7 @@ pub struct SuperVersion {
 pub struct SuperVersions(VecDeque<SuperVersion>);
 
 impl SuperVersions {
-    pub fn new(version: Version, memtable_filter: bool) -> Self {
+    pub fn new(version: Version, memtable_filter: Option<usize>) -> Self {
         Self(
             vec![SuperVersion {
                 // **The tree's first memtable, and on a fresh tree the one that holds
@@ -217,19 +217,19 @@ mod tests {
         let mut history = SuperVersions(
             vec![
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 0,
                 },
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 1,
                 },
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 2,
@@ -250,19 +250,19 @@ mod tests {
         let mut history = SuperVersions(
             vec![
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 0,
                 },
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 1,
                 },
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 2,
@@ -283,25 +283,25 @@ mod tests {
         let mut history = SuperVersions(
             vec![
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 0,
                 },
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 1,
                 },
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 2,
                 },
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 8,
@@ -322,13 +322,13 @@ mod tests {
         let mut history = SuperVersions(
             vec![
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 0,
                 },
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 8,
@@ -349,13 +349,13 @@ mod tests {
         let mut history = SuperVersions(
             vec![
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 0,
                 },
                 SuperVersion {
-                    active_memtable: Arc::new(Memtable::new(0, false)),
+                    active_memtable: Arc::new(Memtable::new(0, None)),
                     sealed_memtables: Arc::default(),
                     version: Version::new(0, crate::TreeType::Standard),
                     seqno: 2,
